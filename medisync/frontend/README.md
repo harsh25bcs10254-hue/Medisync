@@ -4,14 +4,14 @@ Responsive React experience for the MediSync healthcare platform. The frontend s
 
 ## Run locally
 
-1. Start the backend from `backend/backend`:
+1. Start the backend from `medisync/backend`:
 
    ```bash
    npm install
    npm run dev
    ```
 
-2. From `backend/backend`, seed synthetic demo accounts and sample patient data:
+2. From `medisync/backend`, seed synthetic demo accounts and sample patient data:
 
    ```powershell
    $env:SEED_DEMO_DATA = "true"
@@ -23,7 +23,7 @@ Responsive React experience for the MediSync healthcare platform. The frontend s
 
    The seed is idempotent and disabled in production. Newly created demo accounts share the supplied password; existing demo account passwords are not changed. The seed prepares four upcoming visits and one completed visit with a synthetic doctor-authored record.
 
-3. Start the frontend from `backend/frontend`:
+3. Start the frontend from `medisync/frontend`:
 
    ```bash
    npm install
@@ -47,7 +47,7 @@ The patient account and doctor accounts all use the shared password supplied to 
 
 The demo hospital admin can manage patient and doctor accounts. The admin account uses the shared `SEED_DEMO_PASSWORD` when first created, or `SEED_ADMIN_PASSWORD` when that variable is supplied to the seed command. Setting `SEED_ADMIN_PASSWORD` also updates the demo admin password without changing other existing demo passwords. Password values are never printed by the seeder.
 
-To set or reset the demo admin password locally, run the seed from `backend/backend` with both environment variables set in that PowerShell process:
+To set or reset the demo admin password locally, run the seed from `medisync/backend` with both environment variables set in that PowerShell process:
 
 ```powershell
 $env:SEED_DEMO_DATA = "true"
