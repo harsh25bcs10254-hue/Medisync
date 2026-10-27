@@ -10,8 +10,6 @@ services:
     envVars:
       - key: NODE_ENV
         value: production
-      - key: CLIENT_ORIGIN
-        value: https://agent-6ae0f05969804e3b07750a--lucky-puppy-bf5db2.netlify.app
       - key: JWT_ACCESS_SECRET
         generateValue: true
       - key: MONGODB_URI

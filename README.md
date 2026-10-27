@@ -52,7 +52,7 @@ An authorized administrator can list patient and doctor accounts, create account
 | Database and data models | MongoDB with Mongoose 8 |
 | Authentication | JWT access and refresh tokens in HttpOnly cookies; bcrypt password hashing |
 | Payment processing | Razorpay Checkout and server-side order/payment verification |
-| HTTP security | Helmet, CORS allow-list, role-based authorization, request validation, and rate limits |
+| HTTP security | Helmet, role-based authorization, request validation, and rate limits |
 | Automated checks | Node.js test runner and Vite production build |
 
 ## Architecture
@@ -86,19 +86,19 @@ The backend is authoritative for sensitive decisions:
 - Only the doctor assigned to a completed appointment can write or update its report. Patients can view their own records but cannot modify or delete them.
 - Authentication tokens are stored in HttpOnly cookies and are not exposed to frontend JavaScript.
 
-## Deploy on Netlify and Render
+## Deploy on Vercel and Render
 
-The frontend is hosted on Netlify and the API on Render. In Netlify, set the base directory to `frontend`, the build command to `npm ci && npm run build`, and the publish directory to `dist`. Set the following build environment variable for the production context and deploy previews:
+The frontend is hosted on Vercel and the API on Render. Configure the Vercel project with `frontend` as its root directory, `npm run build` as its build command, and `dist` as its output directory. The production API URL is set in `frontend/.env.production`:
 
 ```text
-VITE_API_URL=https://medisync-veut.onrender.com/api/v1
+VITE_API_URL=https://medisync-1-ewin.onrender.com/api/v1
 ```
 
-On the Render API service, set `NODE_ENV=production` and `CLIENT_ORIGIN` to your exact Netlify production origin, for example `https://your-site.netlify.app`. The backend also allows HTTPS Netlify deploy-preview domains. Keep `MONGODB_URI`, `JWT_ACCESS_SECRET`, and Razorpay credentials configured only on Render. After changing environment variables, redeploy the backend and trigger a new Netlify deploy so Vite includes the API URL.
+The Render service requires `NODE_ENV=production`, `MONGODB_URI`, and a private, randomly generated `JWT_ACCESS_SECRET` of at least 32 characters. Keep these and Razorpay credentials in Render's environment settings, not in frontend variables or source control. The `render.yaml` blueprint generates the JWT secret and leaves database/payment secrets for manual configuration. When changing a deployed service's environment, apply the blueprint or update its Render environment and redeploy.
 
-The supplied Netlify preview URL is `https://agent-6ae0f05969804e3b07750a--lucky-puppy-bf5db2.netlify.app`; it is allowed by the preview-origin rule. If the production frontend uses a custom domain, add that exact origin to `CLIENT_ORIGIN` or the backend allow-list before deploying.
+The frontend sends cookies with `credentials: 'include'`. Production auth cookies are `HttpOnly; Secure; SameSite=None`. CORS is disabled in this deployment, so a browser cannot call the separate Render API origin from Vercel; API calls require a same-origin proxy. This also avoids third-party-cookie restrictions.
 
-The frontend sends cookies with `credentials: 'include'`. In production, the API sets auth cookies with `SameSite=None; Secure` for cross-site Netlify-to-Render requests. Browser privacy settings may still block third-party cookies in some contexts; hosting the frontend and API on the same site/custom domain avoids that limitation.
+The frontend's production API URL is set in `frontend/.env.production`. Because it points directly at Render while CORS is disabled, deploy a same-origin API proxy before expecting browser login or session restoration to work.
 
 Create a MongoDB Atlas database and user if you do not already have one. Add the Render service’s outbound IP addresses to Atlas network access where supported; for a demo, a broader allow-list may be required, but use a strong unique database password. Razorpay Test Mode supports testing only; configure production payment credentials only when ready to accept real payments. Render’s free service may sleep when idle, so its first request after inactivity can take longer.
 
@@ -124,7 +124,6 @@ Configure the backend environment with the following values:
 NODE_ENV=development
 PORT=5000
 MONGODB_URI=your-mongodb-connection-string
-CLIENT_ORIGIN=http://localhost:5173
 JWT_ACCESS_SECRET=replace-with-a-random-secret-at-least-32-characters
 RAZORPAY_KEY_ID=your-razorpay-test-key-id
 RAZORPAY_KEY_SECRET=your-razorpay-test-key-secret
@@ -163,7 +162,7 @@ npm install
 npm run dev
 ```
 
-Open the Vite URL shown in the terminal, normally `http://localhost:5173`. To use another API URL, set `VITE_API_URL`; the default is `http://localhost:5000/api/v1`. The backend development configuration allows the equivalent `localhost` and `127.0.0.1` origins on the same port.
+Open the Vite URL shown in the terminal, normally `http://localhost:5173`. To use another API URL, set `VITE_API_URL`; the default is `http://localhost:5000/api/v1`. A separate local API origin is subject to browser CORS enforcement.
 
 ## Tests and checks
 

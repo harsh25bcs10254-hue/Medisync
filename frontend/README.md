@@ -4,7 +4,7 @@ Responsive React experience for the MediSync healthcare platform. The frontend s
 
 ## Deploy
 
-For Netlify frontend and Render backend deployment settings, follow the [root deployment guide](../README.md#deploy-on-netlify-and-render). Set `VITE_API_URL` in Netlify to the Render API URL ending in `/api/v1`.
+For Vercel frontend and Render backend deployment settings, follow the [root deployment guide](../README.md#deploy-on-vercel-and-render). The production API URL is configured in `.env.production`.
 
 ## Run locally
 
@@ -67,7 +67,7 @@ Each doctor has seeded appointments to demonstrate the assigned-doctor workflow.
 
 Set `VITE_API_URL` in a local `.env` file to use a different backend API URL. See `.env.example`.
 
-The backend must allow the frontend origin through `CLIENT_ORIGIN`. In development, the backend also allows the equivalent `localhost` or `127.0.0.1` origin on the same port. Authentication cookies are sent with credentialed requests and are never read by JavaScript.
+The backend does not enable CORS. Browsers block requests between separate frontend and backend origins, so the deployed frontend must use a same-origin API proxy for API calls to work. Authentication cookies are sent with credentialed requests and are never read by JavaScript.
 Paid appointment checkout requires Razorpay Test Mode keys in the backend environment (`RAZORPAY_KEY_ID` and `RAZORPAY_KEY_SECRET`).
 
 ## Available frontend flows
