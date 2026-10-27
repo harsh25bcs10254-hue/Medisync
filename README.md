@@ -57,23 +57,22 @@ An authorized administrator can list patient and doctor accounts, create account
 
 ## Architecture
 
-The project is in [`medisync/`](./medisync/), with separate backend and frontend applications:
+The repository root contains separate backend and frontend applications:
 
 ```text
-medisync/
-  backend/
-    src/
-      config/       Environment, MongoDB, and Razorpay setup
-      controllers/  HTTP request and response handlers
-      middleware/   Authentication, authorization, validation, and errors
-      models/       Mongoose schemas and database indexes
-      routes/       Versioned API endpoints
-      services/     Appointment, payment, account, and record workflows
-      utils/        Shared errors, token, and signature helpers
-    docs/           API, architecture, data model, and scope documentation
-    test/           Backend tests
-  frontend/
-    src/            React dashboard, API client, and styles
+backend/
+  src/
+    config/       Environment, MongoDB, and Razorpay setup
+    controllers/  HTTP request and response handlers
+    middleware/   Authentication, authorization, validation, and errors
+    models/       Mongoose schemas and database indexes
+    routes/       Versioned API endpoints
+    services/     Appointment, payment, account, and record workflows
+    utils/        Shared errors, token, and signature helpers
+  docs/           API, architecture, data model, and scope documentation
+  test/           Backend tests
+frontend/
+  src/            React dashboard, API client, and styles
 ```
 
 The API is mounted under `/api/v1`. MongoDB stores users, appointments, health records, refresh tokens, and appointment payment reservations in separate collections. Appointments and health records reference their patient and doctor users; user virtuals populate these related records without copying them into user documents.
@@ -89,7 +88,7 @@ The backend is authoritative for sensitive decisions:
 
 ## Deploy on Netlify and Render
 
-The frontend is hosted on Netlify and the API on Render. In Netlify, set the base directory to `medisync/frontend`, the build command to `npm ci && npm run build`, and the publish directory to `dist`. Set the following build environment variable for the production context and deploy previews:
+The frontend is hosted on Netlify and the API on Render. In Netlify, set the base directory to `frontend`, the build command to `npm ci && npm run build`, and the publish directory to `dist`. Set the following build environment variable for the production context and deploy previews:
 
 ```text
 VITE_API_URL=https://medisync-veut.onrender.com/api/v1
@@ -113,7 +112,7 @@ Create a MongoDB Atlas database and user if you do not already have one. Add the
 
 ### Backend
 
-From `medisync/backend`, install dependencies and create a local `.env` file:
+From `backend`, install dependencies and create a local `.env` file:
 
 ```powershell
 npm install
@@ -143,7 +142,7 @@ The API health endpoint is `http://localhost:5000/api/v1/health`.
 
 ### Seed synthetic demo accounts
 
-In another PowerShell terminal, from `medisync/backend`, set a demo password and run the idempotent development seeder:
+In another PowerShell terminal, from `backend`, set a demo password and run the idempotent development seeder:
 
 ```powershell
 $env:SEED_DEMO_DATA = "true"
@@ -153,11 +152,11 @@ Remove-Item Env:\SEED_DEMO_DATA
 Remove-Item Env:\SEED_DEMO_PASSWORD
 ```
 
-The seeded patient and doctor accounts use the supplied password when first created. See [`medisync/frontend/README.md`](./medisync/frontend/README.md) for demo account emails and optional administrator-password setup. The seeder refuses to run in production.
+The seeded patient and doctor accounts use the supplied password when first created. See [`frontend/README.md`](./frontend/README.md) for demo account emails and optional administrator-password setup. The seeder refuses to run in production.
 
 ### Frontend
 
-From `medisync/frontend`:
+From `frontend`:
 
 ```powershell
 npm install
@@ -168,14 +167,14 @@ Open the Vite URL shown in the terminal, normally `http://localhost:5173`. To us
 
 ## Tests and checks
 
-Run backend syntax checks and tests from `medisync/backend`:
+Run backend syntax checks and tests from `backend`:
 
 ```powershell
 npm run check
 npm test
 ```
 
-Build the frontend from `medisync/frontend`:
+Build the frontend from `frontend`:
 
 ```powershell
 npm run build
@@ -183,8 +182,8 @@ npm run build
 
 ## Further documentation
 
-- [Frontend setup and demo accounts](./medisync/frontend/README.md)
-- [Backend API reference](./medisync/backend/docs/api.md)
-- [Architecture](./medisync/backend/docs/architecture.md)
-- [Database design](./medisync/backend/docs/database-design.md)
-- [Feature scope](./medisync/backend/docs/feature-scope.md)
+- [Frontend setup and demo accounts](./frontend/README.md)
+- [Backend API reference](./backend/docs/api.md)
+- [Architecture](./backend/docs/architecture.md)
+- [Database design](./backend/docs/database-design.md)
+- [Feature scope](./backend/docs/feature-scope.md)
