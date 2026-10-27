@@ -1,5 +1,6 @@
 import express from 'express';
 import cookieParser from 'cookie-parser';
+import cors from 'cors';
 import helmet from 'helmet';
 import apiRoutes from './routes/index.js';
 import { notFound } from './middleware/notFound.js';
@@ -7,8 +8,17 @@ import { errorHandler } from './middleware/errorHandler.js';
 import { env } from './config/env.js';
 
 const app = express();
+const allowedOrigins = [
+  'http://localhost:5173',
+  'https://medisync-o184fb344-harsh25bcs10254-hues-projects.vercel.app'
+];
+
 app.disable('x-powered-by');
 app.set('trust proxy', env.NODE_ENV === 'production' ? 1 : false);
+app.use(cors({
+  origin: allowedOrigins,
+  credentials: true
+}));
 app.use(helmet({
   contentSecurityPolicy: {
     directives: {
