@@ -2,6 +2,10 @@
 
 Responsive React experience for the MediSync healthcare platform. The frontend supports patient registration, sign-in, session restoration, appointment booking, health-record access, admin account management and sign-out using the backend's HttpOnly cookie authentication.
 
+## Deploy
+
+For a guided Render deployment, follow the [root deployment guide](../../README.md#deploy-on-render). The repository Blueprint builds this frontend as a static site and supplies its backend API URL.
+
 ## Run locally
 
 1. Start the backend from `medisync/backend`:

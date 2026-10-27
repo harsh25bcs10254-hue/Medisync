@@ -87,6 +87,24 @@ The backend is authoritative for sensitive decisions:
 - Only the doctor assigned to a completed appointment can write or update its report. Patients can view their own records but cannot modify or delete them.
 - Authentication tokens are stored in HttpOnly cookies and are not exposed to frontend JavaScript.
 
+## Deploy on Render
+
+The repository includes a Render Blueprint at [`render.yaml`](./render.yaml) that creates the API and static frontend together.
+
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/harsh25bcs10254-hue/Medisync)
+
+1. Push this repository to GitHub.
+2. Create a MongoDB Atlas database and database user. Copy the application connection string; URL-encode any special characters in the database password.
+3. In Render, choose **New → Blueprint**, connect this GitHub repository, and select the `main` branch.
+4. When prompted, provide `MONGODB_URI` and your Razorpay **Test Mode** `RAZORPAY_KEY_ID` and `RAZORPAY_KEY_SECRET`. Render generates the JWT secret.
+5. Wait for both services to deploy. Open `https://medisync-web.onrender.com`; check the API at `https://medisync-api.onrender.com/api/v1/health`.
+
+The Blueprint configures the frontend API URL and the backend's allowed frontend origin for those service names. If Render assigns different service URLs, update `VITE_API_URL` on `medisync-web` and `CLIENT_ORIGIN` on `medisync-api` to match, then redeploy both services.
+
+For Atlas connectivity, add the Render service's outbound IP addresses to the Atlas network access list when using a plan with stable outbound IPs. For a quick demo without stable outbound IPs, Atlas may require a broader IP allow-list; use a strong unique database password and restrict access where possible. Do not commit Atlas or Razorpay credentials. Razorpay Test Mode supports testing only; configure production payment credentials only when you are ready to accept real payments.
+
+The free Render web service may sleep when idle, so the first API request after inactivity can take longer. The frontend is a static site and remains available.
+
 ## Run locally
 
 ### Requirements
