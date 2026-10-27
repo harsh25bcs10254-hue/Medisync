@@ -8,15 +8,11 @@ import { errorHandler } from './middleware/errorHandler.js';
 import { env } from './config/env.js';
 
 const app = express();
-const allowedOrigins = [
-  'http://localhost:5173',
-  'https://medisync-o184fb344-harsh25bcs10254-hues-projects.vercel.app'
-];
 
 app.disable('x-powered-by');
 app.set('trust proxy', env.NODE_ENV === 'production' ? 1 : false);
 app.use(cors({
-  origin: allowedOrigins,
+  origin: true,
   credentials: true
 }));
 app.use(helmet({
