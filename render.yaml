@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: medisync-api
+    name: medisync-veut
     runtime: node
     plan: free
     rootDir: medisync/backend
@@ -11,7 +11,7 @@ services:
       - key: NODE_ENV
         value: production
       - key: CLIENT_ORIGIN
-        value: https://medisync-web.onrender.com
+        value: https://agent-6ae0f05969804e3b07750a--lucky-puppy-bf5db2.netlify.app
       - key: JWT_ACCESS_SECRET
         generateValue: true
       - key: MONGODB_URI
@@ -20,13 +20,3 @@ services:
         sync: false
       - key: RAZORPAY_KEY_SECRET
         sync: false
-
-  - type: web
-    name: medisync-web
-    runtime: static
-    rootDir: medisync/frontend
-    buildCommand: npm ci && npm run build
-    staticPublishPath: ./dist
-    envVars:
-      - key: VITE_API_URL
-        value: https://medisync-api.onrender.com/api/v1

@@ -87,23 +87,21 @@ The backend is authoritative for sensitive decisions:
 - Only the doctor assigned to a completed appointment can write or update its report. Patients can view their own records but cannot modify or delete them.
 - Authentication tokens are stored in HttpOnly cookies and are not exposed to frontend JavaScript.
 
-## Deploy on Render
+## Deploy on Netlify and Render
 
-The repository includes a Render Blueprint at [`render.yaml`](./render.yaml) that creates the API and static frontend together.
+The frontend is hosted on Netlify and the API on Render. In Netlify, set the base directory to `medisync/frontend`, the build command to `npm ci && npm run build`, and the publish directory to `dist`. Set the following build environment variable for the production context and deploy previews:
 
-[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/harsh25bcs10254-hue/Medisync)
+```text
+VITE_API_URL=https://medisync-veut.onrender.com/api/v1
+```
 
-1. Push this repository to GitHub.
-2. Create a MongoDB Atlas database and database user. Copy the application connection string; URL-encode any special characters in the database password.
-3. In Render, choose **New → Blueprint**, connect this GitHub repository, and select the `main` branch.
-4. When prompted, provide `MONGODB_URI` and your Razorpay **Test Mode** `RAZORPAY_KEY_ID` and `RAZORPAY_KEY_SECRET`. Render generates the JWT secret.
-5. Wait for both services to deploy. Open `https://medisync-web.onrender.com`; check the API at `https://medisync-api.onrender.com/api/v1/health`.
+On the Render API service, set `NODE_ENV=production` and `CLIENT_ORIGIN` to your exact Netlify production origin, for example `https://your-site.netlify.app`. The backend also allows HTTPS Netlify deploy-preview domains. Keep `MONGODB_URI`, `JWT_ACCESS_SECRET`, and Razorpay credentials configured only on Render. After changing environment variables, redeploy the backend and trigger a new Netlify deploy so Vite includes the API URL.
 
-The Blueprint configures the frontend API URL and the backend's allowed frontend origin for those service names. If Render assigns different service URLs, update `VITE_API_URL` on `medisync-web` and `CLIENT_ORIGIN` on `medisync-api` to match, then redeploy both services.
+The supplied Netlify preview URL is `https://agent-6ae0f05969804e3b07750a--lucky-puppy-bf5db2.netlify.app`; it is allowed by the preview-origin rule. If the production frontend uses a custom domain, add that exact origin to `CLIENT_ORIGIN` or the backend allow-list before deploying.
 
-For Atlas connectivity, add the Render service's outbound IP addresses to the Atlas network access list when using a plan with stable outbound IPs. For a quick demo without stable outbound IPs, Atlas may require a broader IP allow-list; use a strong unique database password and restrict access where possible. Do not commit Atlas or Razorpay credentials. Razorpay Test Mode supports testing only; configure production payment credentials only when you are ready to accept real payments.
+The frontend sends cookies with `credentials: 'include'`. In production, the API sets auth cookies with `SameSite=None; Secure` for cross-site Netlify-to-Render requests. Browser privacy settings may still block third-party cookies in some contexts; hosting the frontend and API on the same site/custom domain avoids that limitation.
 
-The free Render web service may sleep when idle, so the first API request after inactivity can take longer. The frontend is a static site and remains available.
+Create a MongoDB Atlas database and user if you do not already have one. Add the Render service’s outbound IP addresses to Atlas network access where supported; for a demo, a broader allow-list may be required, but use a strong unique database password. Razorpay Test Mode supports testing only; configure production payment credentials only when ready to accept real payments. Render’s free service may sleep when idle, so its first request after inactivity can take longer.
 
 ## Run locally
 

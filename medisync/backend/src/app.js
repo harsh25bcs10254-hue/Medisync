@@ -10,6 +10,7 @@ import { env } from './config/env.js';
 const app = express();
 const clientOrigin = new URL(env.CLIENT_ORIGIN);
 const allowedClientOrigins = new Set([clientOrigin.origin]);
+const netlifyOriginPattern = /^https:\/\/[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.netlify\.app$/i;
 
 if (env.NODE_ENV === 'development' && ['localhost', '127.0.0.1'].includes(clientOrigin.hostname)) {
   clientOrigin.hostname = clientOrigin.hostname === 'localhost' ? '127.0.0.1' : 'localhost';
@@ -28,7 +29,16 @@ app.use(helmet({
     }
   }
 }));
-app.use(cors({ origin: [...allowedClientOrigins], credentials: true }));
+app.use(cors({
+  origin(origin, callback) {
+    if (!origin) return callback(null, false);
+    if (allowedClientOrigins.has(origin) || netlifyOriginPattern.test(origin)) {
+      return callback(null, origin);
+    }
+    return callback(null, false);
+  },
+  credentials: true
+}));
 app.use(express.json({ limit: '1mb' }));
 app.use(express.urlencoded({ extended: false, limit: '1mb' }));
 app.use(cookieParser());

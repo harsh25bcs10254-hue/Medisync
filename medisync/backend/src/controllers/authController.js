@@ -7,7 +7,7 @@ import ApiError from '../utils/ApiError.js';
 const accessCookieOptions = () => ({
   httpOnly: true,
   secure: env.NODE_ENV === 'production',
-  sameSite: 'lax',
+  sameSite: env.NODE_ENV === 'production' ? 'none' : 'lax',
   path: '/',
   maxAge: env.ACCESS_TOKEN_TTL_MINUTES * 60 * 1000
 });
@@ -15,7 +15,7 @@ const accessCookieOptions = () => ({
 const refreshCookieOptions = (maxAge = env.REFRESH_TOKEN_TTL_DAYS * 24 * 60 * 60 * 1000) => ({
   httpOnly: true,
   secure: env.NODE_ENV === 'production',
-  sameSite: 'lax',
+  sameSite: env.NODE_ENV === 'production' ? 'none' : 'lax',
   path: '/api/v1/auth',
   maxAge
 });

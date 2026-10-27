@@ -4,7 +4,7 @@ Responsive React experience for the MediSync healthcare platform. The frontend s
 
 ## Deploy
 
-For a guided Render deployment, follow the [root deployment guide](../../README.md#deploy-on-render). The repository Blueprint builds this frontend as a static site and supplies its backend API URL.
+For Netlify frontend and Render backend deployment settings, follow the [root deployment guide](../../README.md#deploy-on-netlify-and-render). Set `VITE_API_URL` in Netlify to the Render API URL ending in `/api/v1`.
 
 ## Run locally
 
@@ -34,7 +34,7 @@ For a guided Render deployment, follow the [root deployment guide](../../README.
    npm run dev
    ```
 
-4. Open the Vite URL (normally `http://localhost:5173`). The frontend connects to `http://localhost:5000/api/v1` by default.
+4. Open the Vite URL (normally `http://localhost:5173`). The frontend defaults to the deployed Render API; copy `.env.example` to `.env` to use the local API at `http://localhost:5000/api/v1`.
 
 ## Seeded demo accounts
 
