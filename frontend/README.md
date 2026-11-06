@@ -1,6 +1,18 @@
+## Demo video
+
+[Watch the MediSync demo] => https://drive.google.com/file/d/1WnIa0vvJe9lok0PVcZDdNGI0a0vw9nCn/view
 # MediSync frontend
 
-Responsive React experience for the MediSync healthcare platform. The frontend supports patient registration, sign-in, session restoration, appointment booking, health-record access, admin account management and sign-out using the backend's HttpOnly cookie authentication.
+MediSync is a full-stack healthcare platform that connects patients, doctors, and hospital administrators. Patients can manage appointments and view their health records, doctors can manage visits and author records, and administrators can manage patient and doctor accounts. The responsive frontend communicates with a REST API and uses HttpOnly cookies for authentication.
+
+## Tech stack
+
+- **Frontend:** React 19, Vite 7, JavaScript
+- **Backend:** Node.js, Express 5
+- **Database:** MongoDB with Mongoose
+- **Authentication and validation:** JSON Web Tokens, bcrypt, Zod
+- **Payments:** Razorpay
+
 
 ## Deploy
 
@@ -67,7 +79,7 @@ Each doctor has seeded appointments to demonstrate the assigned-doctor workflow.
 
 Set `VITE_API_URL` in a local `.env` file to use a different backend API URL. See `.env.example`.
 
-The backend does not enable CORS. Browsers block requests between separate frontend and backend origins, so the deployed frontend must use a same-origin API proxy for API calls to work. Authentication cookies are sent with credentialed requests and are never read by JavaScript.
+Production API requests use a same-origin Netlify proxy to the Render backend so browser authentication cookies remain first-party. `VITE_API_URL` is set to `/api/v1` in `.env.production`; update the proxy destination in `netlify.toml` if the backend URL changes. In Netlify, use `npm run build` as the build command and `dist` as the publish directory. If `VITE_API_URL` is set in Netlify environment variables, set it to `/api/v1`. Authentication cookies are HttpOnly and are never read by JavaScript.
 Paid appointment checkout requires Razorpay Test Mode keys in the backend environment (`RAZORPAY_KEY_ID` and `RAZORPAY_KEY_SECRET`).
 
 ## Available frontend flows
