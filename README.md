@@ -1,188 +1,97 @@
-# MediSync
+## Demo video
 
-MediSync is a web application for coordinating patient appointments and doctor-authored visit reports. It brings appointment selection, consultation payments, and records from completed visits into one role-based workflow.
+[Watch the MediSync demo] => https://drive.google.com/file/d/1WnIa0vvJe9lok0PVcZDdNGI0a0vw9nCn/view
+# MediSync frontend
 
-## The problem
+MediSync is a full-stack healthcare platform that connects patients, doctors, and hospital administrators. Patients can manage appointments and view their health records, doctors can manage visits and author records, and administrators can manage patient and doctor accounts. The responsive frontend communicates with a REST API and uses HttpOnly cookies for authentication.
 
-Patients often have to manage appointments, payment confirmations, and health information across disconnected services or paper records. This can make it difficult to find an appointment time, know whether a booking is confirmed, and access visit information later.
+## Tech stack
 
-Care teams also need clear boundaries around appointment and record management. A patient should not be able to reserve the same doctor's slot as someone else, and a doctor should only be able to write reports for patients they actually saw.
+- **Frontend:** React 19, Vite 7, JavaScript
+- **Backend:** Node.js, Express 5
+- **Database:** MongoDB with Mongoose
+- **Authentication and validation:** JSON Web Tokens, bcrypt, Zod
+- **Payments:** Razorpay
 
-MediSync addresses these problems with:
 
-- A patient dashboard for choosing a doctor specialty, seeing consultation fees, finding an available time, and managing appointments.
-- Razorpay Test Mode checkout for paid appointments. An appointment is confirmed only after the backend verifies the payment.
-- Doctor and patient dashboards that share appointment-linked records while enforcing role and appointment ownership.
-- An admin dashboard for provisioning and enabling or disabling patient and doctor accounts.
+## Deploy
 
-MediSync is a software demonstration, not a medical device or a substitute for clinical judgment. Demo accounts and seeded records are synthetic.
-
-## Main workflows
-
-### Patient
-
-1. Register or sign in.
-2. Select a doctor by specialty and consultation fee.
-3. Choose an available 30-minute appointment slot.
-4. Pay through Razorpay Checkout when the appointment has a fee.
-5. View the appointment after the backend verifies the payment, and view reports added by the assigned doctor.
-
-Failed or abandoned checkout does not create a paid appointment. A pending checkout reserves its slot for up to 10 minutes. A zero-fee appointment does not require payment. Cancelling a paid appointment does not automatically issue a refund.
-
-### Doctor
-
-1. View appointments assigned to the signed-in doctor.
-2. Mark an appointment complete after its scheduled 30-minute duration.
-3. Write or update the report linked to that appointment.
-
-The backend checks doctor identity, appointment ownership, completion status, and timing before accepting a report.
-
-### Hospital administrator
-
-An authorized administrator can list patient and doctor accounts, create accounts, and enable or disable them. Public registration creates patient accounts only.
-
-## Technology
-
-| Area | Technology |
-|---|---|
-| Frontend | React 19, JavaScript ES modules, CSS |
-| Frontend tooling | Vite 7 |
-| Backend | Node.js, Express 5, JavaScript ES modules |
-| API validation | Zod |
-| Database and data models | MongoDB with Mongoose 8 |
-| Authentication | JWT access and refresh tokens in HttpOnly cookies; bcrypt password hashing |
-| Payment processing | Razorpay Checkout and server-side order/payment verification |
-| HTTP security | Helmet, role-based authorization, request validation, and rate limits |
-| Automated checks | Node.js test runner and Vite production build |
-
-## Architecture
-
-The repository root contains separate backend and frontend applications:
-
-```text
-backend/
-  src/
-    config/       Environment, MongoDB, and Razorpay setup
-    controllers/  HTTP request and response handlers
-    middleware/   Authentication, authorization, validation, and errors
-    models/       Mongoose schemas and database indexes
-    routes/       Versioned API endpoints
-    services/     Appointment, payment, account, and record workflows
-    utils/        Shared errors, token, and signature helpers
-  docs/           API, architecture, data model, and scope documentation
-  test/           Backend tests
-frontend/
-  src/            React dashboard, API client, and styles
-```
-
-The API is mounted under `/api/v1`. MongoDB stores users, appointments, health records, refresh tokens, and appointment payment reservations in separate collections. Appointments and health records reference their patient and doctor users; user virtuals populate these related records without copying them into user documents.
-
-The backend is authoritative for sensitive decisions:
-
-- Appointment fees are read from the stored doctor account, not from a client-supplied amount.
-- Unique database indexes prevent two active appointments or pending payment reservations from claiming the same doctor and time.
-- Razorpay payment signatures are checked server-side, payment details are fetched from Razorpay, and an authorized payment is captured before a paid appointment is created.
-- If a captured payment cannot be matched to a valid reservation, the backend requests a refund rather than confirming an appointment.
-- Only the doctor assigned to a completed appointment can write or update its report. Patients can view their own records but cannot modify or delete them.
-- Authentication tokens are stored in HttpOnly cookies and are not exposed to frontend JavaScript.
-
-## Deploy on Vercel and Render
-
-The frontend is hosted on Vercel and the API on Render. Configure the Vercel project with `frontend` as its root directory, `npm run build` as its build command, and `dist` as its output directory. The production API URL is set in `frontend/.env.production`:
-
-```text
-VITE_API_URL=https://medisync-1-ewin.onrender.com/api/v1
-```
-
-The Render service requires `NODE_ENV=production`, `MONGODB_URI`, and a private, randomly generated `JWT_ACCESS_SECRET` of at least 32 characters. Keep these and Razorpay credentials in Render's environment settings, not in frontend variables or source control. The `render.yaml` blueprint generates the JWT secret and leaves database/payment secrets for manual configuration. When changing a deployed service's environment, apply the blueprint or update its Render environment and redeploy.
-
-The frontend sends cookies with `credentials: 'include'`. Production auth cookies are `HttpOnly; Secure; SameSite=None`. CORS is disabled in this deployment, so a browser cannot call the separate Render API origin from Vercel; API calls require a same-origin proxy. This also avoids third-party-cookie restrictions.
-
-The frontend's production API URL is set in `frontend/.env.production`. Because it points directly at Render while CORS is disabled, deploy a same-origin API proxy before expecting browser login or session restoration to work.
-
-Create a MongoDB Atlas database and user if you do not already have one. Add the Render service’s outbound IP addresses to Atlas network access where supported; for a demo, a broader allow-list may be required, but use a strong unique database password. Razorpay Test Mode supports testing only; configure production payment credentials only when ready to accept real payments. Render’s free service may sleep when idle, so its first request after inactivity can take longer.
+For Vercel frontend and Render backend deployment settings, follow the [root deployment guide](../README.md#deploy-on-vercel-and-render). The production API URL is configured in `.env.production`.
 
 ## Run locally
 
-### Requirements
+1. Start the backend from the repository's `backend` directory:
 
-- Node.js and npm
-- A MongoDB database
-- Razorpay Test Mode credentials to exercise paid appointment checkout
+   ```bash
+   npm install
+   npm run dev
+   ```
 
-### Backend
+2. From the repository's `backend` directory, seed synthetic demo accounts and sample patient data:
 
-From `backend`, install dependencies and create a local `.env` file:
+   ```powershell
+   $env:SEED_DEMO_DATA = "true"
+   $env:SEED_DEMO_PASSWORD = "choose-a-demo-password-at-least-12-characters"
+   npm run seed
+   Remove-Item Env:\SEED_DEMO_DATA
+   Remove-Item Env:\SEED_DEMO_PASSWORD
+   ```
 
-```powershell
-npm install
-```
+   The seed is idempotent and disabled in production. Newly created demo accounts share the supplied password; existing demo account passwords are not changed. The seed prepares four upcoming visits and one completed visit with a synthetic doctor-authored record.
 
-Configure the backend environment with the following values:
+3. Start the frontend from the repository's `frontend` directory:
 
-```dotenv
-NODE_ENV=development
-PORT=5000
-MONGODB_URI=your-mongodb-connection-string
-JWT_ACCESS_SECRET=replace-with-a-random-secret-at-least-32-characters
-RAZORPAY_KEY_ID=your-razorpay-test-key-id
-RAZORPAY_KEY_SECRET=your-razorpay-test-key-secret
-```
+   ```bash
+   npm install
+   npm run dev
+   ```
 
-Keep `.env` and all credentials private; never commit them. For local authentication-only work, Razorpay values can be omitted, but paid appointment checkout will be unavailable until valid Test Mode keys are configured.
+4. Open the Vite URL (normally `http://localhost:5173`). The frontend defaults to the deployed Render API; copy `.env.example` to `.env` to use the local API at `http://localhost:5000/api/v1`.
 
-Start the API:
+## Seeded demo accounts
 
-```powershell
-npm run dev
-```
+The patient account and doctor accounts all use the shared password supplied to the seed command when first created. Seeded account passwords are not printed by the script.
 
-The API health endpoint is `http://localhost:5000/api/v1/health`.
+| Account | Email | Specialty | Consultation fee |
+|---|---|---|---:|
+| Demo patient | `patient@medisync.test` | — | — |
+| Demo doctor | `doctor@medisync.test` | General Medicine | ₹500 |
+| Cardiology | `doctor.cardiology@medisync.test` | Cardiology | ₹1,200 |
+| Dermatology | `doctor.dermatology@medisync.test` | Dermatology | ₹800 |
+| Pediatrics | `doctor.pediatrics@medisync.test` | Pediatrics | ₹700 |
+| Demo hospital admin | `hospitaladmin@medisync.test` | Account management | — |
 
-### Seed synthetic demo accounts
+The demo hospital admin can manage patient and doctor accounts. The admin account uses the shared `SEED_DEMO_PASSWORD` when first created, or `SEED_ADMIN_PASSWORD` when that variable is supplied to the seed command. Setting `SEED_ADMIN_PASSWORD` also updates the demo admin password without changing other existing demo passwords. Password values are never printed by the seeder.
 
-In another PowerShell terminal, from `backend`, set a demo password and run the idempotent development seeder:
+To set or reset the demo admin password locally, run the seed from the repository's `backend` directory with both environment variables set in that PowerShell process:
 
 ```powershell
 $env:SEED_DEMO_DATA = "true"
-$env:SEED_DEMO_PASSWORD = "choose-a-demo-password-at-least-12-characters"
+$env:SEED_DEMO_PASSWORD = "your-demo-password-at-least-12-characters"
+$env:SEED_ADMIN_PASSWORD = "your-admin-password-at-least-12-characters"
 npm run seed
 Remove-Item Env:\SEED_DEMO_DATA
 Remove-Item Env:\SEED_DEMO_PASSWORD
+Remove-Item Env:\SEED_ADMIN_PASSWORD
 ```
 
-The seeded patient and doctor accounts use the supplied password when first created. See [`frontend/README.md`](./frontend/README.md) for demo account emails and optional administrator-password setup. The seeder refuses to run in production.
+Each doctor has seeded appointments to demonstrate the assigned-doctor workflow. The completed General Medicine appointment includes a synthetic record; upcoming appointments can be completed after their scheduled duration.
 
-### Frontend
+Set `VITE_API_URL` in a local `.env` file to use a different backend API URL. See `.env.example`.
 
-From `frontend`:
+Production API requests use a same-origin Netlify proxy to the Render backend so browser authentication cookies remain first-party. `VITE_API_URL` is set to `/api/v1` in `.env.production`; update the proxy destination in `netlify.toml` if the backend URL changes. In Netlify, use `npm run build` as the build command and `dist` as the publish directory. If `VITE_API_URL` is set in Netlify environment variables, set it to `/api/v1`. Authentication cookies are HttpOnly and are never read by JavaScript.
+Paid appointment checkout requires Razorpay Test Mode keys in the backend environment (`RAZORPAY_KEY_ID` and `RAZORPAY_KEY_SECRET`).
 
-```powershell
-npm install
-npm run dev
-```
+## Available frontend flows
 
-Open the Vite URL shown in the terminal, normally `http://localhost:5173`. To use another API URL, set `VITE_API_URL`; the default is `http://localhost:5000/api/v1`. A separate local API origin is subject to browser CORS enforcement.
+- Patient sign-up and sign-in
+- Session restoration using the access and rotating refresh cookies
+- Sign-out through the backend
+- Appointment booking with active doctors, 30-minute available time slots, Razorpay checkout, and appointment confirmation only after verified payment
+- Appointment cancellation; paid appointment cancellations do not automatically issue a refund
+- Patient read-only access to health records authored by the doctor assigned to a completed appointment
+- Doctor appointment workflow to complete an elapsed visit and add or update its linked health record
+- Hospital admin account management to provision patient/doctor accounts and disable or re-enable them
 
-## Tests and checks
-
-Run backend syntax checks and tests from `backend`:
-
-```powershell
-npm run check
-npm test
-```
-
-Build the frontend from `frontend`:
-
-```powershell
-npm run build
-```
-
-## Further documentation
-
-- [Frontend setup and demo accounts](./frontend/README.md)
-- [Backend API reference](./backend/docs/api.md)
-- [Architecture](./backend/docs/architecture.md)
-- [Database design](./backend/docs/database-design.md)
-- [Feature scope](./backend/docs/feature-scope.md)
+Public registration creates a patient account; selecting a staff role is not supported.
+Health records can only be created or updated by the assigned doctor after completing an appointment. Patients have read-only access; earlier patient-entered notes remain visible as legacy notes. File uploads are not supported.
